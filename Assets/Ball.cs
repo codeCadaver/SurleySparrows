@@ -26,7 +26,7 @@ public class Ball : MonoBehaviour
     private void Start()
     {
         _canDrag = true;
-        // _line.enabled = false;
+        _line.enabled = true;
         // _line = GetComponent<LineRenderer>();
         _main = Camera.main;
         _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -111,7 +111,7 @@ public class Ball : MonoBehaviour
     private void DetachBall()
     {
         float distance = _launchPosition.x - _pivot.transform.position.x;
-        if (transform.position.x > _pivot.transform.position.x + Math.Abs(distance / 4))
+        if (transform.position.x > _pivot.transform.position.x + Math.Abs(distance / 2))
         {
             _ballLaunched = true;
             _springJoint2D.enabled = false;
