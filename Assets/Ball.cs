@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
-using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+// using UnityEngine.InputSystem.EnhancedTouch;
+// using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class Ball : MonoBehaviour
 {
+    public static Action OnHitTarget;
+    
     [SerializeField] private float _spawnDelay = 2f;
     [SerializeField] private GameObject _pivot;
     [SerializeField] private LineRenderer _line;
@@ -18,7 +20,6 @@ public class Ball : MonoBehaviour
     private bool _canDrag = true;
     private bool _isDragging;
     private Camera _main;
-    // private LineRenderer _line;
     private Rigidbody2D _rigidbody2D;
     private SpringJoint2D _springJoint2D;
     private Vector3 _launchPosition;
@@ -27,14 +28,10 @@ public class Ball : MonoBehaviour
     {
         _canDrag = true;
         _line.enabled = true;
-        // _line = GetComponent<LineRenderer>();
         _main = Camera.main;
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _springJoint2D = GetComponent<SpringJoint2D>();
         transform.position = _pivot.transform.position;
-        // _rigidbody2D.velocity = Vector3.zero;
-        // _rigidbody2D.angularVelocity = 0;
-        // _rigidbody2D.rotation = 0;
         _rigidbody2D.isKinematic = true;
     }
 
@@ -67,8 +64,8 @@ public class Ball : MonoBehaviour
 
     private void DetectTouch()
     {
-        // if (!Touchscreen.current.primaryTouch.press.isPressed)
-        if(Touch.activeTouches.Count == 0)
+        if (!Touchscreen.current.primaryTouch.press.isPressed)
+        // if(Touch.activeTouches.Count == 0)
         {
             if (_isDragging)
             {
@@ -83,14 +80,14 @@ public class Ball : MonoBehaviour
             _isDragging = true;
             _rigidbody2D.isKinematic = true;
 
-            Vector2 touchPosition = new Vector2();
-            foreach(var touch in Touch.activeTouches)
-            {
-                touchPosition += touch.screenPosition;
-            }
-            touchPosition /= Touch.activeTouches.Count;
+            // Vector2 touchPosition = new Vector2();
+            // foreach(var touch in Touch.activeTouches)
+            // {
+            //     touchPosition += touch.screenPosition;
+            // }
+            // touchPosition /= Touch.activeTouches.Count;
             
-            // Vector2 touchPosition = Touchscreen.current.primaryTouch.position.ReadValue();
+            Vector2 touchPosition = Touchscreen.current.primaryTouch.position.ReadValue();
             Vector3 worldPosition = _main.ScreenToWorldPoint(touchPosition);
             worldPosition.z = transform.position.z;
 
@@ -101,7 +98,6 @@ public class Ball : MonoBehaviour
     private void LaunchBall()
     {
         _launchPosition = transform.position;
-        Debug.Log($"LaunchPosition: {_launchPosition.x}, Pivot: {_pivot.transform.position.x - (_launchPosition.x / 2)} ");
         _rigidbody2D.isKinematic = false;
         _canDetach = true;
         _canDrag = false;
@@ -135,16 +131,24 @@ public class Ball : MonoBehaviour
         _rigidbody2D.velocity = Vector3.zero;
         _rigidbody2D.angularVelocity = 0;
         _rigidbody2D.rotation = 0;
-
     }
 
-    private void OnEnable()
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        EnhancedTouchSupport.Enable();
+        if (other.gameObject.CompareTag("Destructable"))
+        {
+            OnHitTarget?.Invoke();
+        }
     }
 
-    private void OnDisable()
-    {
-        EnhancedTouchSupport.Disable();
-    }
+    // private void OnEnable()
+    // {
+    //     EnhancedTouchSupport.Enable();
+    // }
+    //
+    // private void OnDisable()
+    // {
+    //     EnhancedTouchSupport.Disable();
+    // }
+    
 }
